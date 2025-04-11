@@ -3,6 +3,7 @@ from flask_cors import CORS
 from youtube_transcript_api import YouTubeTranscriptApi
 from transformers import pipeline
 import re
+import os
 
 def get_video_id_from_url(url):
     video_id_match = re.search(r'(?:v=|\/)([0-9A-Za-z_-]{11})', url)
@@ -11,6 +12,10 @@ def get_video_id_from_url(url):
 app = Flask(__name__)
 CORS(app)  # Enable CORS
 summariser = pipeline('summarization')  # Load the model once
+
+@app.route("/")
+def home():
+    return "Flask YouTube summarizer is running!"
 
 @app.route('/api/summarize-youtube', methods=['POST'])
 def summary_api():
@@ -42,4 +47,5 @@ def get_summary(transcript):
     return summary.strip()
 
 if __name__ == '__main__':
-    app.run(debug=True, port=5000)
+    port = int(os.environ.get('PORT', 5000))
+    app.run(host='0.0.0.0', port=port)
