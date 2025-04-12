@@ -19,7 +19,8 @@ summariser = pipeline("summarization", model="sshleifer/distilbart-cnn-12-6")  #
 def home():
     return "Flask YouTube summarizer is running!"
 
-@app.route('/api/summarize-youtube', methods=['POST'])
+@app.route('/api/summarize-youtube', methods=['POST']) 
+@app.route('/api/summarize-youtube/', methods=['POST'])
 def summary_api():
     data = request.get_json()
     url = data.get('url', '')
