@@ -21,7 +21,7 @@ const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
         setError('');
         setSummary('');
   
-        const response = await axios.post(`${API_URL}/summarize-youtube`, {
+        const response = await axios.post(`${API_URL}/api/summarize-youtube`, {
           url: youtubeUrl
         });
   
