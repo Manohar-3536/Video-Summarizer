@@ -10,7 +10,8 @@ def get_video_id_from_url(url):
     return video_id_match.group(1) if video_id_match else None
 
 app = Flask(__name__)
-CORS(app)  # Enable CORS
+CORS(app, resources={r"/api/*": {"origins": "https://video-summarizer-iota.vercel.app"}})  # Enable CORS
+print("CORS enabled for https://video-summarizer-iota.vercel.app")
 # summariser = pipeline('summarization')
 summariser = pipeline("summarization", model="sshleifer/distilbart-cnn-12-6")  # Load the model once
 
@@ -23,6 +24,7 @@ def home():
 @app.route('/api/summarize-youtube/', methods=['POST'])
 def summary_api():
     data = request.get_json()
+    print("📩 Incoming request:", data) # Debugging
     url = data.get('url', '')
 
     video_id = get_video_id_from_url(url)
