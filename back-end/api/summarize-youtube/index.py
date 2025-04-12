@@ -5,16 +5,16 @@ from transformers import pipeline
 import re
 import os
 
+app = Flask(__name__)
+CORS(app, resources={r"/api/*": {"origins": "https://video-summarizer-iota.vercel.app"}})
+print("CORS enabled for https://video-summarizer-iota.vercel.app")
+
+# Initialize summarizer
+summariser = pipeline("summarization", model="sshleifer/distilbart-cnn-12-6")
+
 def get_video_id_from_url(url):
     video_id_match = re.search(r'(?:v=|\/)([0-9A-Za-z_-]{11})', url)
     return video_id_match.group(1) if video_id_match else None
-
-app = Flask(__name__)
-CORS(app, resources={r"/api/*": {"origins": "https://video-summarizer-iota.vercel.app"}})  # Enable CORS
-print("CORS enabled for https://video-summarizer-iota.vercel.app")
-# summariser = pipeline('summarization')
-summariser = pipeline("summarization", model="sshleifer/distilbart-cnn-12-6")  # Load the model once
-
 
 @app.route("/")
 def home():
@@ -24,7 +24,7 @@ def home():
 @app.route('/api/summarize-youtube/', methods=['POST'])
 def summary_api():
     data = request.get_json()
-    print("📩 Incoming request:", data) # Debugging
+    print("📩 Incoming request:", data)
     url = data.get('url', '')
 
     video_id = get_video_id_from_url(url)
@@ -43,14 +43,29 @@ def get_transcript(video_id):
     transcript = ' '.join([d['text'] for d in transcript_list])
     return transcript
 
-def get_summary(transcript):
-    summary = ''
-    for i in range(0, len(transcript), 1000):
-        chunk = transcript[i:i+1000]
-        summary_text = summariser(chunk)[0]['summary_text']
-        summary += summary_text + ' '
-    return summary.strip()
+def get_summary(text, max_chunk_size=1000):
+    # Break text into sentence-based chunks
+    sentences = re.split(r'(?<=[.?!])\s+', text)
+    chunks = []
+    current_chunk = ""
 
+    for sentence in sentences:
+        if len(current_chunk) + len(sentence) <= max_chunk_size:
+            current_chunk += sentence + " "
+        else:
+            chunks.append(current_chunk.strip())
+            current_chunk = sentence + " "
+    if current_chunk:
+        chunks.append(current_chunk.strip())
+
+    summaries = []
+    for chunk in chunks:
+        summary = summariser(chunk, max_length=150, min_length=40, do_sample=False)[0]['summary_text']
+        summaries.append(summary)
+
+    return " ".join(summaries)
+
+# For platforms like Railway
 application = app
 
 if __name__ == '__main__':
