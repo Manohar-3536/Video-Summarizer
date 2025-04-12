@@ -3,3 +3,4 @@ flask-cors
 youtube-transcript-api
 transformers
 torch
+gunicorn
