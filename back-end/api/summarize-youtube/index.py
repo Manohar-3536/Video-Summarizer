@@ -11,7 +11,9 @@ def get_video_id_from_url(url):
 
 app = Flask(__name__)
 CORS(app)  # Enable CORS
-summariser = pipeline('summarization')  # Load the model once
+# summariser = pipeline('summarization')
+summariser = pipeline("summarization", model="sshleifer/distilbart-cnn-12-6")  # Load the model once
+
 
 @app.route("/")
 def home():
