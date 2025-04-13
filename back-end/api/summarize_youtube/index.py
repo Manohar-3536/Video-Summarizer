@@ -59,23 +59,26 @@ def get_summary(text, max_chunk_size=400):  # Reduced from 800 to 400
     
     # Simple fixed-length chunking (more reliable)
     chunks = [text[i:i+max_chunk_size] for i in range(0, len(text), max_chunk_size)]
+    print(f"Transcript length: {len(text)}, chunks: {len(chunks)}")
     
+    for i, chunk in enumerate(chunks):
+        print(f"Chunk {i}: {len(chunk)} chars, ~{len(chunk.split())} words")
+
     summaries = []
     for chunk in chunks:
-        # try:
-        #     result = summariser(chunk, max_length=150, min_length=40, do_sample=False)
-        #     summaries.append(result[0]['summary_text'])
         try:
-            result = summariser(chunk[:1000], max_length=150, min_length=40, do_sample=False)
+            input_length = len(chunk.split())
+            max_length = int(min(150, max(40, input_length * 0.5)))
+            
+            result = summariser(chunk, max_length=max_length, min_length=40, do_sample=False)
+            output_length = len(result[0]['summary_text'].split())
+            print(f"Input length: {input_length}, Output length: {output_length}")
             summaries.append(result[0]['summary_text'])
+            gc.collect()
         except Exception as e:
             print("🧨 Summary generation failed for chunk length", len(chunk))
             print("🧾 Chunk:", chunk[:200])  # Show a preview
             print("❗ Error:", str(e))
-
-        # except Exception as e:
-        #     print(f"Error on chunk: {e}")
-        #     continue
     
     return " ".join(summaries)
 # For Railway
