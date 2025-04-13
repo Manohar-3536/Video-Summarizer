@@ -124,7 +124,7 @@ def process_chunk(chunk, chunk_index):
         
         input_length = len(chunk.split())
         max_length = int(min(150, max(40, input_length * 0.5)))
-        min_length = min(40, max(20, input_length * 0.3))  # Adjusted min_length
+        min_length = int(min(40, max(20, input_length * 0.3)))  # Adjusted min_length
         
         print(f"Chunk {chunk_index}: {len(chunk)} chars, ~{len(chunk.split())} words")
         
