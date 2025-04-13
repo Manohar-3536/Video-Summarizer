@@ -54,39 +54,6 @@ def get_transcript(video_id):
     transcript = ' '.join([d['text'] for d in transcript_list])
     return transcript
 
-# def get_summary(text, max_chunk_size=800):
-#     # Lazy load summarizer here to reduce memory footprint during cold start
-#     summariser = pipeline("summarization", model="sshleifer/distilbart-cnn-12-6")
-
-#     # Split text into sentence-based chunks
-#     sentences = re.split(r'(?<=[.?!])\s+', text)
-#     chunks = []
-#     current_chunk = ""
-
-#     for sentence in sentences:
-#         if len(current_chunk) + len(sentence) <= max_chunk_size:
-#             current_chunk += sentence + " "
-#         else:
-#             chunks.append(current_chunk.strip())
-#             current_chunk = sentence + " "
-#     if current_chunk:
-#         chunks.append(current_chunk.strip())
-
-#     summaries = []
-#     for chunk in chunks:
-#         try:
-#             result = summariser(chunk, max_length=150, min_length=40, do_sample=False)
-#             summaries.append(result[0]['summary_text'])
-#         except Exception as e:
-#             print(f"🧨 Summarization error on chunk: {e}")
-#             continue
-
-#     # Clear memory after processing
-#     del summariser
-#     gc.collect()
-
-#     return " ".join(summaries)
-
 def get_summary(text, max_chunk_size=400):  # Reduced from 800 to 400
     summariser = pipeline("summarization", model="sshleifer/distilbart-cnn-12-6", device=-1)  # Force CPU
     
@@ -95,12 +62,20 @@ def get_summary(text, max_chunk_size=400):  # Reduced from 800 to 400
     
     summaries = []
     for chunk in chunks:
+        # try:
+        #     result = summariser(chunk, max_length=150, min_length=40, do_sample=False)
+        #     summaries.append(result[0]['summary_text'])
         try:
-            result = summariser(chunk, max_length=150, min_length=40, do_sample=False)
+            result = summariser(chunk[:1000], max_length=150, min_length=40, do_sample=False)
             summaries.append(result[0]['summary_text'])
         except Exception as e:
-            print(f"Error on chunk: {e}")
-            continue
+            print("🧨 Summary generation failed for chunk length", len(chunk))
+            print("🧾 Chunk:", chunk[:200])  # Show a preview
+            print("❗ Error:", str(e))
+
+        # except Exception as e:
+        #     print(f"Error on chunk: {e}")
+        #     continue
     
     return " ".join(summaries)
 # For Railway
