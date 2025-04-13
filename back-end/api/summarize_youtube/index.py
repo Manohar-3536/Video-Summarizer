@@ -22,8 +22,8 @@ def get_video_id_from_url(url):
 def home():
     return "Flask YouTube summarizer is running!"
 
-@app.route('/api/summarize-youtube', methods=['POST']) 
-@app.route('/api/summarize-youtube/', methods=['POST'])
+@app.route('/api/summarize_youtube', methods=['POST']) 
+@app.route('/api/summarize_youtube/', methods=['POST'])
 def summary_api():
     data = request.get_json()
     print("📩 Incoming request:", data)
