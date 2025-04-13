@@ -10,7 +10,9 @@ CORS(app, resources={r"/api/*": {"origins": "https://video-summarizer-iota.verce
 print("CORS enabled for https://video-summarizer-iota.vercel.app")
 
 # Initialize summarizer
-summariser = pipeline("summarization", model="sshleifer/distilbart-cnn-12-6")
+# summariser = pipeline("summarization", model="sshleifer/distilbart-cnn-12-6")
+summariser = pipeline("summarization", model="knkarthick/MEETING_SUMMARY")
+
 
 def get_video_id_from_url(url):
     video_id_match = re.search(r'(?:v=|\/)([0-9A-Za-z_-]{11})', url)
