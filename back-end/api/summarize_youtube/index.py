@@ -12,6 +12,18 @@ print("CORS enabled for https://video-summarizer-iota.vercel.app")
 # Initialize summarizer
 # summariser = pipeline("summarization", model="sshleifer/distilbart-cnn-12-6")
 summariser = pipeline("summarization", model="knkarthick/MEETING_SUMMARY")
+@app.route('/api/summarize_youtube', methods=['GET'])
+def debug_get():
+    print("⚠️  Received unexpected GET request to /api/summarize_youtube")
+    print(f"🔍 Method: {request.method}")
+    print(f"🌐 Remote IP: {request.remote_addr}")
+    print(f"🧾 Headers: {dict(request.headers)}")
+    print(f"🔗 Full URL: {request.url}")
+    print(f"📱 User-Agent: {request.headers.get('User-Agent')}")
+    print(f"🪪 Referer: {request.headers.get('Referer')}")
+    print(f"🔐 Origin: {request.headers.get('Origin')}")
+    
+    return jsonify({"error": "Only POST allowed"}), 405
 
 
 def get_video_id_from_url(url):
@@ -22,8 +34,7 @@ def get_video_id_from_url(url):
 def home():
     return "Flask YouTube summarizer is running!"
 
-@app.route('/api/summarize_youtube', methods=['POST']) 
-@app.route('/api/summarize_youtube/', methods=['POST'])
+@app.route('/api/summarize_youtube', methods=['POST'], strict_slashes=False)
 def summary_api():
     data = request.get_json()
     print("📩 Incoming request:", data)
