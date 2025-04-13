@@ -5,10 +5,23 @@ from transformers import pipeline
 import re
 import os
 import gc
+import torch
 
 app = Flask(__name__)
 CORS(app, resources={r"/api/*": {"origins": "https://video-summarizer-iota.vercel.app"}})
 print("CORS enabled for https://video-summarizer-iota.vercel.app")
+
+# Load the summarization model once at app startup
+# This prevents memory leaks that occur when loading the model on each request
+print("Loading summarization model at app startup...")
+try:
+    # Force CPU usage to avoid GPU memory issues
+    device = -1  # CPU
+    summariser = pipeline("summarization", model="sshleifer/distilbart-cnn-12-6", device=device)
+    print("✅ Model loaded successfully")
+except Exception as e:
+    print(f"❌ Error loading model: {str(e)}")
+    summariser = None
 
 @app.route('/api/summarize_youtube', methods=['GET'])
 def debug_get():
@@ -33,6 +46,10 @@ def home():
 
 @app.route('/api/summarize_youtube', methods=['POST'], strict_slashes=False)
 def summary_api():
+    # Check if model was loaded successfully
+    if summariser is None:
+        return jsonify({'error': 'Summarization model failed to load'}), 500
+        
     data = request.get_json()
     print("📩 Incoming request:", data)
     url = data.get('url', '')
@@ -42,8 +59,17 @@ def summary_api():
         return jsonify({'error': 'Invalid YouTube URL'}), 400
 
     try:
+        # Set a timeout for the transcript fetch
         transcript = get_transcript(video_id)
         summary = get_summary(transcript)
+        
+        # Clear CUDA cache if using GPU
+        if torch.cuda.is_available():
+            torch.cuda.empty_cache()
+            
+        # Force garbage collection
+        gc.collect()
+        
         return jsonify({'summary': summary}), 200
     except Exception as e:
         print("🔥 ERROR:", str(e))
@@ -55,7 +81,8 @@ def get_transcript(video_id):
     return transcript
 
 def get_summary(text, max_chunk_size=400):  # Reduced from 800 to 400
-    summariser = pipeline("summarization", model="sshleifer/distilbart-cnn-12-6", device=-1)  # Force CPU
+    # Use the globally loaded model instead of creating a new one
+    global summariser
     
     # Simple fixed-length chunking (more reliable)
     chunks = [text[i:i+max_chunk_size] for i in range(0, len(text), max_chunk_size)]
@@ -74,13 +101,18 @@ def get_summary(text, max_chunk_size=400):  # Reduced from 800 to 400
             output_length = len(result[0]['summary_text'].split())
             print(f"Input length: {input_length}, Output length: {output_length}")
             summaries.append(result[0]['summary_text'])
-            gc.collect()
+            
+            # Clear CUDA cache if using GPU
+            if torch.cuda.is_available():
+                torch.cuda.empty_cache()
+                
         except Exception as e:
             print("🧨 Summary generation failed for chunk length", len(chunk))
             print("🧾 Chunk:", chunk[:200])  # Show a preview
             print("❗ Error:", str(e))
     
     return " ".join(summaries)
+
 # For Railway
 application = app
 
