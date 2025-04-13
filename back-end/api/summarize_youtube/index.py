@@ -19,37 +19,23 @@ summariser = None
 model = None
 tokenizer = None
 
-# Load the summarization model once at app startup with quantization
+# Load the summarization model once at app startup
 print("Loading summarization model at app startup...")
 try:
-    # Force CPU usage and enable quantization for better performance
+    # Force CPU usage
     device = -1  # CPU
     
-    # Option 1: Load with pipeline (original approach but with quantization)
-    # summariser = pipeline("summarization", model="sshleifer/distilbart-cnn-6-6", device=device)
-    
-    # Option 2: Load model and tokenizer separately for more control and quantization
+    # Load model and tokenizer separately for more control
     model_name = "sshleifer/distilbart-cnn-6-6"  # Smaller, faster model than the 12-6 version
     tokenizer = AutoTokenizer.from_pretrained(model_name)
-    
-    # Load with 8-bit quantization if bitsandbytes is available
-    try:
-        from bitsandbytes.nn import Linear8bitLt
-        model = AutoModelForSeq2SeqLM.from_pretrained(model_name, device_map="auto", load_in_8bit=True)
-        print("✅ Model loaded with 8-bit quantization")
-    except ImportError:
-        # Fall back to regular loading if bitsandbytes is not available
-        model = AutoModelForSeq2SeqLM.from_pretrained(model_name)
-        model.to(f"cpu")
-        print("✅ Model loaded without quantization (bitsandbytes not available)")
+    model = AutoModelForSeq2SeqLM.from_pretrained(model_name)
+    model.to("cpu")
+    print("✅ Model loaded successfully")
     
     # Create summarizer function
     def summarize_text(text, max_length=150, min_length=40):
         inputs = tokenizer(text, return_tensors="pt", max_length=512, truncation=True)
-        if torch.cuda.is_available():
-            inputs = {k: v.to("cuda") for k, v in inputs.items()}
-        else:
-            inputs = {k: v.to("cpu") for k, v in inputs.items()}
+        inputs = {k: v.to("cpu") for k, v in inputs.items()}
             
         summary_ids = model.generate(
             inputs["input_ids"], 
@@ -118,10 +104,6 @@ def summary_api():
         processing_time = time.time() - start_time
         print(f"⏱️ Total processing time: {processing_time:.2f} seconds")
         
-        # Clear CUDA cache if using GPU
-        if torch.cuda.is_available():
-            torch.cuda.empty_cache()
-            
         # Force garbage collection
         gc.collect()
         

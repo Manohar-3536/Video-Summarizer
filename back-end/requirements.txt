@@ -4,7 +4,6 @@ youtube-transcript-api
 transformers
 torch
 gunicorn
-bitsandbytes
-accelerate
+
 
 
