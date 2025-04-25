@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 
-const API_URL = process.env.REACT_APP_API_URL;
-// const API_URL = "http://localhost:5000" //for development phase
+// const API_URL = process.env.REACT_APP_API_URL;
+const API_URL = "http://localhost:5000"
 
 function App() {
   const [youtubeUrl, setYoutubeUrl] = useState('');
@@ -51,10 +51,10 @@ function App() {
   };
 
   return (
-    <div className="min-h-screen w-full bg-gradient-to-br from-purple-900 to-indigo-900 flex items-center justify-center p-4">
-      <div className="w-full max-w-7xl rounded-xl overflow-hidden shadow-2xl bg-slate-800/30 backdrop-blur-sm">
+    <div className="min-h-screen w-full bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex items-center justify-center p-4">
+      <div className="w-full max-w-7xl rounded-xl overflow-hidden shadow-2xl bg-white/5 backdrop-blur-md">
         {/* Header */}
-        <div className="p-4 bg-indigo-600 text-white">
+        <div className="p-4 bg-gradient-to-r from-indigo-600 to-violet-600 text-white">
           <div className="flex items-center justify-between">
             <h1 className="text-2xl md:text-3xl font-bold flex items-center">
               <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 mr-2" viewBox="0 0 24 24" fill="currentColor">
@@ -80,7 +80,7 @@ function App() {
         {/* Main Content */}
         <div className="p-4 md:p-6 grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
           {/* Input Section - Always visible but can be smaller when results are shown */}
-          <div className={`bg-white rounded-xl shadow-md overflow-hidden ${videoId ? 'md:col-span-1' : 'md:col-span-2'}`}>
+          <div className={`bg-white rounded-lg shadow-md overflow-hidden ${videoId ? 'md:col-span-1' : 'md:col-span-2'}`}>
             <div className="p-4 md:p-6">
               <form onSubmit={handleYoutubeSubmit} className="space-y-4">
                 <div className="relative">
@@ -156,10 +156,10 @@ function App() {
           
           {/* Results Section - Only visible when results exist */}
           {videoId && (
-            <div className="bg-white rounded-xl shadow-md overflow-hidden">
+            <div className="bg-white rounded-lg shadow-md overflow-hidden">
               <div className="p-4 md:p-6">
                 {/* Video player */}
-                <div className="aspect-w-16 aspect-h-9 mb-4 rounded-lg overflow-hidden shadow-md">
+                <div className="aspect-w-16 aspect-h-9 mb-6 rounded-lg overflow-hidden shadow-lg">
                   <iframe
                     className="w-full h-full"
                     src={`https://www.youtube.com/embed/${videoId}`}
@@ -172,8 +172,8 @@ function App() {
                 
                 {/* Summary section */}
                 <div>
-                  <h2 className="text-xl font-bold text-gray-800 mb-3 flex items-center">
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2 text-indigo-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <h2 className="text-2xl font-bold text-gray-800 mb-3 flex items-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 mr-2 text-indigo-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                     </svg>
                     Summary
@@ -189,7 +189,7 @@ function App() {
           )}
         </div>
         
-        <div className="bg-slate-900 px-6 py-3 text-center text-sm text-slate-300">
+        <div className="bg-slate-800 px-6 py-3 text-center text-sm text-slate-300">
           Quickly summarize any YouTube video content with AI
         </div>
       </div>
