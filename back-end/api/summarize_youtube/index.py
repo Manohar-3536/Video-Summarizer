@@ -20,7 +20,7 @@ except LookupError:
     nltk.download('punkt')
 
 app = Flask(__name__)
-CORS(app, resources={r"/api/*": {"origins": "https://video-summarizer-iota.vercel.app"}})
+CORS(app, resources={r"/api/*": {"origins": ["https://video-summarizer-iota.vercel.app","http://localhost:3000"]}})
 print("CORS enabled for https://video-summarizer-iota.vercel.app")
 
 # Global variables for model and tokenizer
